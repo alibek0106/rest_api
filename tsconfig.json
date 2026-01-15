@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+        "target": "es2019",
+        "lib": [
+            "DOM",
+            "DOM.Iterable",
+            "ESNext"
+        ],
+        "module": "commonjs",
+        "strict": true,
+        "noImplicitAny": true,
+        "esModuleInterop": true,
+        "resolveJsonModule": true,
+        "skipLibCheck": true
+    }
+}
