@@ -1,5 +1,5 @@
 import { APIRequestContext, APIResponse, expect } from '@playwright/test';
-import { PostsArraySchema, PostSchema, EmptyObjectSchema } from '../schemas/posts.schema';
+import { PostsArraySchema, PostSchema, EmptyObjectSchema, Post } from '../schemas/posts.schema';
 import { API_CONSTANTS } from '../constants/api.constants';
 
 export class PostsSteps {
@@ -42,6 +42,62 @@ export class PostsSteps {
         expect(contentType, 'Content-Type header missing or incorrect').toContain(API_CONSTANTS.HEADERS.APP_JSON);
 
         expect(duration, `Response time should be < ${API_CONSTANTS.LIMITS.MAX_RESPONSE_TIME_MS}ms`).toBeLessThan(API_CONSTANTS.LIMITS.MAX_RESPONSE_TIME_MS);
+    }
+
+    /**
+     * Sends a POST request to create a post
+     */
+    async createPost(payload: object) {
+        return await this.request.post(API_CONSTANTS.ENDPOINTS.POSTS, {
+            data: payload,
+        });
+    }
+
+    /**
+     * Validates successful creation
+     * 1. Status 201
+     * 2. ID is 101
+     * 3. Response matches request
+     */
+    async validatePostCreation(response: APIResponse, sentPayload: Partial<Post>) {
+        expect(response.status(), 'Status should be 201 Created').toBe(API_CONSTANTS.STATUS_CODES.CREATED);
+
+        const body = await response.json();
+
+        expect(body.id, 'New Post ID should be 101').toBe(API_CONSTANTS.TEST_DATA.CREATE_POST.EXPECTED_NEW_ID);
+
+        expect(body.title).toBe(sentPayload.title);
+        expect(body.body).toBe(sentPayload.body);
+        expect(body.userId).toBe(sentPayload.userId);
+    }
+
+    /**
+     * Validates API behavior on Empty Payload
+     */
+    async validateEmptyPayloadBehavior(response: APIResponse) {
+        // This should be 400, but JSONPlaceholder returns 201 with just an ID
+        expect(response.status(), 'Status should be 400 (201 in JSONPlaceholder)').toBe(API_CONSTANTS.STATUS_CODES.CREATED);
+
+        const body = await response.json();
+        expect(body.id, 'New Post ID should be 101').toBe(API_CONSTANTS.TEST_DATA.CREATE_POST.EXPECTED_NEW_ID);
+    }
+
+    /**
+     * Security Check
+     * Ensures that extra fields are NOT returned in the response.
+     */
+    async validateSecuritySchemaSanitization(response: APIResponse) {
+        expect(response.status(), 'Status should be 201 Created').toBe(API_CONSTANTS.STATUS_CODES.CREATED);
+        const body = await response.json();
+
+        // Strict schema check
+        try {
+            PostSchema.strict().parse(body);
+        } catch (error) {
+            throw new Error(`Security Check Failed: Response contains unauthorized fields. \n${error}`);
+        }
+
+        expect(body, 'Response should not contain unauthorized fields').not.toHaveProperty('admin');
     }
 
     /**

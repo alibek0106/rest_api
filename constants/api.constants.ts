@@ -17,6 +17,9 @@ export const API_CONSTANTS = {
             NOT_FOUND_ID: 150,
             INVALID_ID_STRING: 'abc',
         },
+        CREATE_POST: {
+            EXPECTED_NEW_ID: 101,
+        }
     },
     STATUS_CODES: {
         OK: 200,
