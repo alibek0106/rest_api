@@ -1,5 +1,5 @@
 import { APIRequestContext, APIResponse, expect } from '@playwright/test';
-import { User, UsersArraySchema } from '../schemas/users.schema';
+import { User, UsersArraySchema, UserSchema } from '../schemas/users.schema';
 import { API_CONSTANTS } from '../constants/api.constants';
 
 export class UsersSteps {
@@ -7,6 +7,22 @@ export class UsersSteps {
 
     async getAllUsers() {
         return await this.request.get(API_CONSTANTS.ENDPOINTS.USERS);
+    }
+
+    async getUserById(userId: number) {
+        return await this.request.get(`${API_CONSTANTS.ENDPOINTS.USERS}/${userId}`);
+    }
+
+    /**
+     * Validates that two user objects are identical.
+     */
+    async validateUserConsistency(userFromList: User, responseDetail: APIResponse) {
+        expect(responseDetail.status(), 'Status code should be 200 OK').toBe(API_CONSTANTS.STATUS_CODES.OK);
+
+        const body = await responseDetail.json();
+        const userDetail = UserSchema.parse(body);
+
+        expect(userFromList, 'User from list should match User from detail view').toEqual(userDetail);
     }
 
     /**

@@ -29,6 +29,9 @@ export const API_CONSTANTS = {
         },
         USERS: {
             EXPECTED_COUNT: 10,
+        },
+        CONSISTENCY: {
+            TARGET_USER_ID: 5,
         }
     },
     STATUS_CODES: {
