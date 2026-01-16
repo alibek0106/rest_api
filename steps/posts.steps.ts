@@ -25,6 +25,43 @@ export class PostsSteps {
     }
 
     /**
+     * Updates an existing post (PUT)
+     */
+    async updatePost(id: number, payload: object) {
+        return await this.request.put(`${API_CONSTANTS.ENDPOINTS.POSTS}/${id}`, {
+            data: payload,
+        });
+    }
+
+    /**
+     * Deletes a post (DELETE)
+     */
+    async deletePost(id: number) {
+        return await this.request.delete(`${API_CONSTANTS.ENDPOINTS.POSTS}/${id}`);
+    }
+
+    /**
+     * Validate successful update
+     */
+    async validatePostUpdate(response: APIResponse, sentPayLoad: Partial<Post>) {
+        expect(response.status(), 'Status should be 200').toBe(API_CONSTANTS.STATUS_CODES.OK);
+
+        const body = await response.json();
+
+        expect(body.title).toBe(sentPayLoad.title);
+        expect(body.body).toBe(sentPayLoad.body);
+    }
+
+    /**
+     * Validates successful delete
+     * Note: JSONPlaceholder returns 200
+     */
+    async validateDelete(response: APIResponse) {
+        const validStatuses = [API_CONSTANTS.STATUS_CODES.OK, API_CONSTANTS.STATUS_CODES.NO_CONTENT];
+        expect(validStatuses, 'Status should be 200 or 204').toContain(response.status());
+    }
+
+    /**
      * Fetches a single post by ID.
      * Accepts number or string to test invalid ID inputs (TC 2.3).
      */
